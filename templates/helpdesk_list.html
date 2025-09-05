@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Help Desk Kayıtları{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">📋 Help Desk Kayıtları</h1>
+
+<div class="d-flex gap-2 mb-3">
+    <a class="btn btn-success" href="{{ url_for('helpdesk_new') }}">+ Yeni Kayıt</a>
+</div>
+
+<!-- Filtreler -->
+<form class="row g-2 align-items-end mb-3" method="get" action="{{ url_for('helpdesk_list') }}">
+    <div class="col-auto">
+        <label class="form-label mb-1">Durum</label>
+        <select name="status" class="form-select">
+            <option value="">(hepsi)</option>
+            {% for s in ["açık","işlem sürecinde","kapalı"] %}
+            <option value="{{ s }}" {% if request.args.get('status')==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <label class="form-label mb-1">Öncelik</label>
+        <select name="priority" class="form-select">
+            <option value="">(hepsi)</option>
+            {% for p in ["açık","normal","yüksek"] %}
+            <option value="{{ p }}" {% if request.args.get('priority')==p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">Filtrele</button>
+        <a class="btn btn-outline-secondary" href="{{ url_for('helpdesk_list') }}">Temizle</a>
+    </div>
+</form>
+
+<!-- Kayıt Listesi -->
+<table class="table table-striped table-hover align-middle">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Kullanıcı</th>
+            <th>Konu</th>
+            <th>Öncelik</th>
+            <th>Durum</th>
+            <th>Oluşturma</th>
+            <th class="text-nowrap">İşlemler</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for t in tickets %}
+        <tr>
+            <td>{{ t.id }}</td>
+            <td>{{ t.username }}</td>
+            <td class="text-break">{{ t.subject }}</td>
+            <td>
+                <span class="badge bg-secondary">{{ t.priority }}</span>
+            </td>
+            <td>
+                <span
+                    class="badge {% if t.status == 'kapalı' %}bg-success{% elif t.status == 'işlem sürecinde' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                    {{ t.status }}
+                </span>
+            </td>
+            <td>
+                {% if t.created_at %}
+                {{ t.created_at.strftime("%Y-%m-%d %H:%M") }}
+                {% else %}
+                -
+                {% endif %}
+            </td>
+            <td class="d-flex flex-wrap gap-1">
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                <!-- Status -->
+                <a class="btn btn-sm btn-outline-primary"
+                    href="{{ url_for('helpdesk_update_status', ticket_id=t.id, to='işlem sürecinde') }}">Başlat</a>
+                <a class="btn btn-sm btn-outline-success"
+                    href="{{ url_for('helpdesk_update_status', ticket_id=t.id, to='kapalı') }}">Kapat</a>
+                <a class="btn btn-sm btn-outline-warning"
+                    href="{{ url_for('helpdesk_update_status', ticket_id=t.id, to='açık') }}">Aç</a>
+
+                <div class="vr mx-1"></div>
+
+                <!-- Priority -->
+                <div class="btn-group btn-group-sm" role="group" aria-label="priority">
+                    <a class="btn btn-outline-secondary"
+                        href="{{ url_for('helpdesk_update_priority', ticket_id=t.id, to='düşük') }}">düşük</a>
+                    <a class="btn btn-outline-secondary"
+                        href="{{ url_for('helpdesk_update_priority', ticket_id=t.id, to='normal') }}">normal</a>
+                    <a class="btn btn-outline-secondary"
+                        href="{{ url_for('helpdesk_update_priority', ticket_id=t.id, to='yüksek') }}">yüksek</a>
+                </div>
+
+                <!-- Edit -->
+                <a class="btn btn-sm btn-outline-dark" href="{{ url_for('helpdesk_edit', ticket_id=t.id) }}">Düzenle</a>
+
+                {% else %}
+                {% if current_user.is_authenticated and t.created_by == current_user.email %}
+                <a class="btn btn-sm btn-outline-dark" href="{{ url_for('helpdesk_edit', ticket_id=t.id) }}">Düzenle</a>
+                {% else %}
+                <span class="text-muted">—</span>
+                {% endif %}
+                {% endif %}
+            </td>
+
+
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="7" class="text-center text-muted py-4">Kayıt bulunamadı.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

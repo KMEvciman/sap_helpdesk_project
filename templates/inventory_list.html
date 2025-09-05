@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Envanter{% endblock %}
+{% block content %}
+<h2 class="mb-3">💻 Envanter</h2>
+
+<form class="row g-2 mb-3" method="get" action="{{ url_for('inventory_list') }}">
+    <div class="col-12 col-md-5">
+        <input type="search" name="q" value="{{ term or '' }}" class="form-control"
+            placeholder="Hostname, kullanıcı, IP, lokasyon…">
+    </div>
+    <div class="col-6 col-md-3">
+        <input type="text" name="os" value="{{ os_name or '' }}" class="form-control" placeholder="OS (örn: Windows)">
+    </div>
+    <div class="col-6 col-md-2">
+        <select name="status" class="form-select">
+            <option value="">Durum (tümü)</option>
+            {% for s in ['active','repair','retired'] %}
+            <option value="{{ s }}" {% if status==s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="col-12 col-md-2 d-grid">
+        <button class="btn btn-primary" type="submit">Filtrele</button>
+    </div>
+</form>
+
+<div class="d-flex justify-content-end mb-2">
+    {% if current_user.role == 'admin' %}
+    <a href="{{ url_for('inventory_new') }}" class="btn btn-success btn-sm">+ Cihaz Ekle</a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-sm table-hover align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Hostname</th>
+                    <th>Kullanıcı</th>
+                    <th>OS</th>
+                    <th>CPU</th>
+                    <th>RAM</th>
+                    <th>Disk</th>
+                    <th>IP</th>
+                    <th>Lokasyon</th>
+                    <th>Durum</th>
+                    <th>Son Görülme</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in assets %}
+                <tr>
+                    <td>{{ a.hostname }}</td>
+                    <td>{{ a.assigned_to or '-' }}</td>
+                    <td>{{ a.os or '-' }}</td>
+                    <td>{{ a.cpu or '-' }}</td>
+                    <td>{{ a.ram_gb or '-' }} GB</td>
+                    <td>{{ a.disk_gb or '-' }} GB</td>
+                    <td>{{ a.ip or '-' }}</td>
+                    <td>{{ a.location or '-' }}</td>
+                    <td>
+                        <span class="badge
+              {% if a.status == 'active' %}bg-success
+              {% elif a.status == 'repair' %}bg-warning text-dark
+              {% else %}bg-secondary{% endif %}">
+                            {{ a.status }}
+                        </span>
+                    </td>
+                    <td>{% if a.last_seen %}{{ a.last_seen.strftime('%Y-%m-%d %H:%M') }}{% else %}-{% endif %}</td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="10" class="text-center text-muted">Kayıt bulunamadı.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

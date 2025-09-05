@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+{% block title %}SAP Raporları{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 1200px;">
+    <h2 class="mb-3">SAP Raporları</h2>
+
+    <!-- Filtre Formu -->
+    <form class="card mb-4" method="get" action="{{ url_for('raporlar') }}"
+        style="border:1px solid #e5e7eb;border-radius:12px;">
+        <div class="card-body" style="padding:16px 16px 0 16px;">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Başlangıç Tarihi</label>
+                    <input type="date" class="form-control" name="start" value="{{ request.args.get('start','') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Bitiş Tarihi</label>
+                    <input type="date" class="form-control" name="end" value="{{ request.args.get('end','') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Müşteri (Siparişler)</label>
+                    <input type="text" class="form-control" name="musteri" placeholder="Örn: ABC"
+                        value="{{ request.args.get('musteri','') }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Malzeme (Stoklar)</label>
+                    <input type="text" class="form-control" name="malzeme" placeholder="Kod/İsim"
+                        value="{{ request.args.get('malzeme','') }}">
+                </div>
+            </div>
+        </div>
+        <div class="card-footer d-flex gap-2" style="padding:12px 16px;">
+            <button type="submit" class="btn btn-primary">Filtrele</button>
+            <a class="btn btn-outline-secondary" href="{{ url_for('raporlar') }}">Temizle</a>
+            <a class="btn btn-success ms-auto"
+                href="{{ url_for('raporlar_export', fmt='xlsx') }}?{{ request.query_string|safe }}">Excel’e Aktar</a>
+        </div>
+    </form>
+
+    <!-- Akordeon Başlangıcı -->
+    <div class="accordion" id="sapAccordion" style="border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;">
+        <!-- Stoklar Bölümü -->
+        <div class="accordion-item" style="border-bottom:1px solid #e5e7eb;">
+            <h2 class="accordion-header" id="headingStok">
+                <button class="accordion-button collapsed" type="button" data-target="#collapseStok"
+                    aria-expanded="false" aria-controls="collapseStok">
+                    📦 Stoklar
+                </button>
+            </h2>
+            <div id="collapseStok" class="accordion-collapse collapse" aria-labelledby="headingStok"
+                data-parent="#sapAccordion">
+                <div class="accordion-body">
+                    {% if stoklar and stoklar|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    {% for k in stoklar[0].keys() %}
+                                    <th>{{ k }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in stoklar %}
+                                <tr>
+                                    {% for v in row.values() %}
+                                    <td>{{ v }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-muted">Kayıt bulunamadı.</div>
+                    {% endif %}
+                    <div class="mt-3">
+                        <img src="{{ url_for('chart_sap_stok_pie') }}" alt="Stok Dağılım Grafiği"
+                            style="max-width:100%;height:auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Siparişler Bölümü -->
+        <div class="accordion-item">
+            <h2 class="accordion-header" id="headingSip">
+                <button class="accordion-button collapsed" type="button" data-target="#collapseSip"
+                    aria-expanded="false" aria-controls="collapseSip">
+                    🧾 Siparişler
+                </button>
+            </h2>
+            <div id="collapseSip" class="accordion-collapse collapse" aria-labelledby="headingSip"
+                data-parent="#sapAccordion">
+                <div class="accordion-body">
+                    {% if siparisler and siparisler|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                            <thead>
+                                <tr>
+                                    {% for k in siparisler[0].keys() %}
+                                    <th>{{ k }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in siparisler %}
+                                <tr>
+                                    {% for v in row.values() %}
+                                    <td>{{ v }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-muted">Kayıt bulunamadı.</div>
+                    {% endif %}
+                    <div class="mt-3">
+                        <img src="{{ url_for('chart_siparis_trend') }}" alt="Sipariş Trend Grafiği"
+                            style="max-width:100%;height:auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Akordeon Sonu -->
+</div>
+
+<!-- Basit Akordeon JS/CSS (Bootstrap’siz) -->
+<style>
+    .accordion-button {
+        width: 100%;
+        text-align: left;
+        padding: 14px 16px;
+        background: #f9fafb;
+        border: none;
+        outline: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .accordion-button:hover {
+        background: #f3f4f6;
+    }
+
+    .accordion-button.collapsed::after {
+        content: "▸";
+        float: right;
+    }
+
+    .accordion-button::after {
+        content: "▾";
+        float: right;
+    }
+
+    .accordion-collapse {
+        display: none;
+    }
+
+    .accordion-collapse.show {
+        display: block;
+    }
+
+    .accordion-body {
+        padding: 16px;
+        background: #ffffff;
+    }
+
+    .table thead th {
+        white-space: nowrap;
+    }
+</style>
+
+<script>
+    (function () {
+        function closeAllExcept(targetId) {
+            document.querySelectorAll('.accordion-collapse').forEach(function (el) {
+                if (el.id !== targetId) {
+                    el.classList.remove('show');
+                    var btn = el.previousElementSibling?.querySelector('.accordion-button');
+                    if (btn) btn.classList.add('collapsed');
+                }
+            });
+        }
+
+        document.querySelectorAll('.accordion-button').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var target = btn.getAttribute('data-target');
+                var panel = document.querySelector(target);
+                var willOpen = !panel.classList.contains('show');
+
+                // tekli aç-kapa (diğerlerini kapat)
+                closeAllExcept(panel.id);
+
+                // hedefi toggle et
+                panel.classList.toggle('show', willOpen);
+                btn.classList.toggle('collapsed', !willOpen);
+            });
+        });
+
+        // Hepsi kapalı başlasın (güvence)
+        closeAllExcept('__none__');
+    })();
+</script>
+{% endblock %}

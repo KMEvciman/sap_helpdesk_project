@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if error_code == 404 %}
+Sayfa Bulunamadı
+{% elif error_code == 403 %}
+Erişim Reddedildi
+{% elif error_code == 500 %}
+Sunucu Hatası
+{% else %}
+Hata {{ error_code }}
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <!-- Hata İkonu -->
+                <div class="mb-4">
+                    {% if error_code == 404 %}
+                    <div class="display-1 text-muted">🔍</div>
+                    {% elif error_code == 403 %}
+                    <div class="display-1 text-warning">🔒</div>
+                    {% elif error_code == 500 %}
+                    <div class="display-1 text-danger">⚡</div>
+                    {% else %}
+                    <div class="display-1 text-secondary">❓</div>
+                    {% endif %}
+                </div>
+
+                <!-- Hata Kodu -->
+                <h1 class="display-3 fw-bold text-dark mb-3">{{ error_code }}</h1>
+
+                <!-- Hata Mesajı -->
+                <h4 class="text-muted mb-4">{{ error_message }}</h4>
+
+                <!-- Detaylı Açıklama -->
+                <div class="alert alert-light border-0 mb-4">
+                    {% if error_code == 404 %}
+                    <strong>Ne oldu?</strong><br>
+                    Aradığınız sayfa bulunamadı. URL'yi kontrol edin veya ana sayfaya dönün.
+                    {% elif error_code == 403 %}
+                    <strong>Erişim Reddedildi</strong><br>
+                    Bu işlem için gerekli yetkilere sahip değilsiniz. Admin ile iletişime geçin.
+                    {% elif error_code == 500 %}
+                    <strong>Sunucu Hatası</strong><br>
+                    Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin.
+                    {% else %}
+                    <strong>Beklenmeyen Hata</strong><br>
+                    Bir sorun oluştu. Lütfen ana sayfaya dönün veya tekrar deneyin.
+                    {% endif %}
+                </div>
+
+                <!-- Aksiyon Butonları -->
+                <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                    <a href="{{ url_for('home') }}" class="btn btn-primary">
+                        🏠 Ana Sayfaya Dön
+                    </a>
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        ← Geri Dön
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('helpdesk_list') }}" class="btn btn-outline-dark">
+                        📋 Help Desk
+                    </a>
+                    <a href="{{ url_for('raporlar') }}" class="btn btn-outline-dark">
+                        📊 SAP Raporları
+                    </a>
+                    {% endif %}
+                </div>
+
+                <!-- Faydalı İpuçları -->
+                <div class="text-start">
+                    <h6 class="text-muted mb-2">💡 Faydalı İpuçları:</h6>
+                    <ul class="list-unstyled text-muted small">
+                        {% if error_code == 404 %}
+                        <li>• URL'yi doğru yazdığınızdan emin olun</li>
+                        <li>• Sayfanın taşınmış olabileceğini düşünün</li>
+                        <li>• Ana sayfadan doğru linke gidin</li>
+                        {% elif error_code == 403 %}
+                        <li>• Giriş yaptığınızdan emin olun</li>
+                        <li>• Doğru hesapla oturum açtığınızı kontrol edin</li>
+                        <li>• Gerekli izinler için admin ile konuşun</li>
+                        {% elif error_code == 500 %}
+                        <li>• Sayfayı yenileyin (F5)</li>
+                        <li>• Birkaç dakika bekleyip tekrar deneyin</li>
+                        <li>• Sorun devam ederse IT destek ile iletişime geçin</li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <!-- Footer bilgi -->
+                <hr class="mt-4">
+                <small class="text-muted">
+                    SAP & Help Desk Sistemi |
+                    {% if current_user.is_authenticated %}
+                    {{ current_user.email }}
+                    {% else %}
+                    <a href="{{ url_for('login') }}">Giriş Yap</a>
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Eğer dashboard'dan gelindiyse, kısa özet göster -->
+{% if error_code == 403 and current_user.is_authenticated %}
+<div class="row justify-content-center mt-4">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-warning">
+            <div class="card-body">
+                <h6 class="card-title text-warning">ℹ️ Bilgi</h6>
+                <p class="card-text small mb-0">
+                    Bu işlem sadece <strong>admin</strong> rolüne sahip kullanıcılar tarafından yapılabilir.
+                    Şu anki rolünüz: <span class="badge bg-secondary">{{ current_user.role }}</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

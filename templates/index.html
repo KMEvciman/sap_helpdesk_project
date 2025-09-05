@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Ana Sayfa{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">📊 IT Help Desk & SAP Dashboard</h1>
+
+{# === Özet kartlar — SADECE ADMIN === #}
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5 class="card-title mb-0">Toplam</h5>
+                    <span class="badge bg-dark">{{ total }}</span>
+                </div>
+                <small class="text-muted">Tüm help desk kayıtları</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5 class="card-title mb-0">açık</h5>
+                    <span class="badge bg-info text-dark">{{ open_c }}</span>
+                </div>
+                <small class="text-muted">Açık talepler</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5 class="card-title mb-0">işlem sürecinde</h5>
+                    <span class="badge bg-warning text-dark">{{ in_prog }}</span>
+                </div>
+                <small class="text-muted">Üzerinde çalışılan</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h5 class="card-title mb-0">kapalı</h5>
+                    <span class="badge bg-success">{{ closed }}</span>
+                </div>
+                <small class="text-muted">Kapanan talepler</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Hızlı aksiyonlar (HERKES) -->
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a href="{{ url_for('helpdesk_new') }}" class="btn btn-primary">+ Yeni Kayıt</a>
+    <a href="{{ url_for('helpdesk_list') }}" class="btn btn-outline-secondary">Kayıtları Gör</a>
+    <a href="{{ url_for('raporlar') }}" class="btn btn-outline-dark">SAP Raporları</a>
+</div>
+
+{# === GRAFİKLERİ TAMAMEN KALDIRDIK (anasayfada yok) === #}
+
+<!-- SAP dosya özetleri (HERKES) -->
+{% if stok_rows is not none or siparis_rows is not none %}
+<div class="row g-3 mb-4">
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-1">Stok Verisi</h5>
+                {% if stok_rows is not none %}
+                <p class="mb-0 text-muted">{{ stok_rows }} satır yüklü (data/stoklar.csv)</p>
+                {% else %}
+                <p class="mb-0 text-muted">Veri bulunamadı (data/stoklar.csv yok)</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-1">Sipariş Verisi</h5>
+                {% if siparis_rows is not none %}
+                <p class="mb-0 text-muted">{{ siparis_rows }} satır yüklü (data/siparisler.csv)</p>
+                {% else %}
+                <p class="mb-0 text-muted">Veri bulunamadı (data/siparisler.csv yok)</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# === Son 5 Help Desk Kaydı — ADMIN ise tümünden, kullanıcı ise kendi oluşturduklarından === #}
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">
+            {% if current_user.is_authenticated and current_user.role == 'admin' %}
+            Son 5 Help Desk Kaydı
+            {% else %}
+            Son 5 Kaydın (Sana Ait)
+            {% endif %}
+        </h5>
+        <div class="table-responsive">
+            <table class="table table-sm align-middle">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Kullanıcı</th>
+                        <th>Konu</th>
+                        <th>Öncelik</th>
+                        <th>Durum</th>
+                        <th>Oluşturma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in recent %}
+                    <tr>
+                        <td>{{ t.id }}</td>
+                        <td>{{ t.username }}</td>
+                        <td class="text-break">{{ t.subject }}</td>
+                        <td><span class="badge bg-secondary">{{ t.priority }}</span></td>
+                        <td>
+                            <span class="badge
+                                {% if t.status == 'kapalı' %}bg-success
+                                {% elif t.status == 'işlem sürecinde' %}bg-warning text-dark
+                                {% else %}bg-info text-dark{% endif %}">
+                                {{ t.status }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if t.created_at %}
+                            {{ t.created_at.strftime("%Y-%m-%d %H:%M") }}
+                            {% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-muted text-center">Kayıt yok.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('helpdesk_list') }}" class="btn btn-outline-secondary btn-sm">Tümünü Gör</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

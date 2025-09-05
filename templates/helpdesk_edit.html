@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Ticket Düzenle{% endblock %}
+{% block content %}
+<h1>Ticket #{{ t.id }} Düzenle</h1>
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Konu</label>
+        <input type="text" class="form-control" name="subject" value="{{ t.subject }}" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Açıklama</label>
+        <textarea class="form-control" name="description" rows="5" required>{{ t.description }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Öncelik</label>
+        <select name="priority" class="form-select">
+            {% for p in ["düşük","normal","yüksek"] %}
+            <option value="{{ p }}" {% if t.priority==p %}selected{% endif %}>{{ p }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button class="btn btn-primary">Kaydet</button>
+    <a href="{{ url_for('helpdesk_list') }}" class="btn btn-outline-secondary">İptal</a>
+</form>
+{% endblock %}

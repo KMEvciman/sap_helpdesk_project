@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Yeni Help Desk Kaydı{% endblock %}
+{% block content %}
+<h1>Yeni Help Desk Kaydı</h1>
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Kullanıcı Adı</label>
+        <input type="text" class="form-control" name="username" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Konu</label>
+        <input type="text" class="form-control" name="subject" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Açıklama</label>
+        <textarea class="form-control" name="description" rows="4" required></textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Öncelik</label>
+        <select name="priority" class="form-select">
+            <option value="düşük">düşük</option>
+            <option value="normal" selected>normal</option>
+            <option value="yüksek">yüksek</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Kaydet</button>
+</form>
+{% endblock %}

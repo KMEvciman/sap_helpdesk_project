@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block title %}Arama: {{ q }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-3">🔎 Arama Sonuçları: <span class="text-muted">{{ q }}</span></h2>
+
+<div class="row g-3">
+    <!-- HelpDesk -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between">
+                    <span>HelpDesk</span><span class="badge bg-secondary">{{ ticket_count }}</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Kullanıcı</th>
+                                <th>Konu</th>
+                                <th>Öncelik</th>
+                                <th>Durum</th>
+                                <th>Oluşturma</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for t in tickets %}
+                            <tr>
+                                <td>{{ t.id }}</td>
+                                <td>{{ t.username }}</td>
+                                <td class="text-break">{{ t.subject }}</td>
+                                <td><span class="badge bg-secondary">{{ t.priority }}</span></td>
+                                <td>
+                                    <span
+                                        class="badge {% if t.status=='closed' %}bg-success{% elif t.status=='in_progress' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                        {{ t.status }}
+                                    </span>
+                                </td>
+                                <td>{% if t.created_at %}{{ t.created_at.strftime("%Y-%m-%d %H:%M") }}{% else %}-{%
+                                    endif %}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-muted text-center">Kayıt bulunamadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end">
+                    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('helpdesk_list') }}">HelpDesk’e Git</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAP: Stoklar -->
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between">
+                    <span>SAP — Stoklar</span><span class="badge bg-secondary">{{ stok_count }}</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                {% if stok_results and stok_results[0] %}
+                                {% for k in stok_results[0].keys() %}<th>{{ k }}</th>{% endfor %}
+                                {% else %}<th>Kayıt</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in stok_results %}
+                            <tr>{% for v in row.values() %}<td class="text-break">{{ v }}</td>{% endfor %}</tr>
+                            {% else %}<tr>
+                                <td class="text-muted">Sonuç yok.</td>
+                            </tr>{% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end"><a class="btn btn-outline-secondary btn-sm"
+                        href="{{ url_for('raporlar') }}">Raporlara Git</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAP: Siparişler -->
+    <div class="col-12 col-xl-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between">
+                    <span>SAP — Siparişler</span><span class="badge bg-secondary">{{ siparis_count }}</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                {% if siparis_results and siparis_results[0] %}
+                                {% for k in siparis_results[0].keys() %}<th>{{ k }}</th>{% endfor %}
+                                {% else %}<th>Kayıt</th>{% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in siparis_results %}
+                            <tr>{% for v in row.values() %}<td class="text-break">{{ v }}</td>{% endfor %}</tr>
+                            {% else %}<tr>
+                                <td class="text-muted">Sonuç yok.</td>
+                            </tr>{% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="text-end"><a class="btn btn-outline-secondary btn-sm"
+                        href="{{ url_for('raporlar') }}">Raporlara Git</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Envanter -->
+
+    {% if current_user.is_authenticated and current_user.role == 'admin' and inventory_count > 0 %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title d-flex justify-content-between">
+                    <span>💻 Envanter</span><span class="badge bg-secondary">{{ inventory_count }}</span>
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Hostname</th>
+                                <th>Kullanıcı</th>
+                                <th>OS</th>
+                                <th>CPU</th>
+                                <th>RAM</th>
+                                <th>Disk</th>
+                                <th>IP</th>
+                                <th>Lokasyon</th>
+                                <th>Durum</th>
+                                <th>Son Görülme</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in inventory_results %}
+                            <tr>
+                                <td>{{ a.hostname }}</td>
+                                <td>{{ a.assigned_to or '-' }}</td>
+                                <td>{{ a.os or '-' }}</td>
+                                <td>{{ a.cpu or '-' }}</td>
+                                <td>{{ a.ram_gb or '-' }} GB</td>
+                                <td>{{ a.disk_gb or '-' }} GB</td>
+                                <td>{{ a.ip or '-' }}</td>
+                                <td>{{ a.location or '-' }}</td>
+                                <td>
+                                    <span class="badge
+                        {% if a.status == 'active' %}bg-success
+                        {% elif a.status == 'repair' %}bg-warning text-dark
+                        {% else %}bg-secondary{% endif %}">
+                                        {{ a.status or '-' }}
+                                    </span>
+                                </td>
+                                <td>{% if a.last_seen %}{{ a.last_seen.strftime('%Y-%m-%d %H:%M') }}{% else %}-{% endif
+                                    %}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="10" class="text-muted text-center">Kayıt bulunamadı.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

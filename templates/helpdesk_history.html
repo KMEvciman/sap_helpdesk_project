@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Geçmiş Ticketlar{% endblock %}
+{% block content %}
+<h1 class="mb-3">🗃️ Geçmiş Ticketlar</h1>
+<table class="table table-striped align-middle">
+    <thead>
+        <tr>
+            <th>#(orijinal)</th>
+            <th>Kullanıcı</th>
+            <th>Konu</th>
+            <th>Öncelik</th>
+            <th>Durum</th>
+            <th>Oluşturma</th>
+            <th>Güncelleme</th>
+            <th>Silinme</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in records %}
+        <tr>
+            <td>{{ r.orig_id }}</td>
+            <td>{{ r.username }}</td>
+            <td class="text-break">{{ r.subject }}</td>
+            <td><span class="badge bg-secondary">{{ r.priority }}</span></td>
+            <td><span class="badge bg-dark">{{ r.status }}</span></td>
+            <td>{{ r.created_at or "-" }}</td>
+            <td>{{ r.updated_at or "-" }}</td>
+            <td>{{ r.deleted_at or "-" }}</td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="8" class="text-center text-muted py-4">Kayıt yok.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('helpdesk_list') }}" class="btn btn-outline-secondary">Geri</a>
+{% endblock %}
