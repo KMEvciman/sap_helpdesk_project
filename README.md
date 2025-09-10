@@ -84,17 +84,6 @@ flask run
 
 ---
 
-## 📊 Screenshots
-
-> Add screenshots inside `/static/screenshots/` and link them here.
-
-- **Login Page**
-- **Ticket List**
-- **SAP Reports**
-- **Dashboard**
-
----
-
 ## 🛠 Technologies Used
 
 - **Backend**: Python (Flask, SQLAlchemy)
