@@ -253,9 +253,9 @@ def home():
     if is_admin():
         try:
             total   = q.count()
-            open_c  = q.filter_by(status="open").count()
-            in_prog = q.filter_by(status="in_progress").count()
-            closed  = q.filter_by(status="closed").count()
+            open_c  = q.filter_by(status="açık").count()
+            in_prog = q.filter_by(status="işlem sürecinde").count()
+            closed  = q.filter_by(status="kapalı").count()
         except Exception as e:
             # Eski veri/kolon uyumsuzluklarında UI tarafında None gösterilir
             print(f"[home] Özet kart sayımları hesaplanamadı: {e}")
@@ -362,10 +362,14 @@ def raporlar():
         flash(f"CSV dosyaları okunamadı: {e}", "danger")
         return redirect(url_for("home"))
 
+    # Mevcut filtreleri koruyarak güvenli export URL'si üret
+    export_url = url_for("raporlar_export", fmt="xlsx", **request.args.to_dict(flat=True))
+
     return render_template(
         "raporlar.html",
         stoklar=stoklar_df.to_dict(orient="records"),
         siparisler=siparisler_df.to_dict(orient="records"),
+        export_url=export_url,
     )
 
 @app.route("/raporlar/export/<string:fmt>")

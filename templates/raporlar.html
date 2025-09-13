@@ -33,8 +33,7 @@
         <div class="card-footer d-flex gap-2" style="padding:12px 16px;">
             <button type="submit" class="btn btn-primary">Filtrele</button>
             <a class="btn btn-outline-secondary" href="{{ url_for('raporlar') }}">Temizle</a>
-            <a class="btn btn-success ms-auto"
-                href="{{ url_for('raporlar_export', fmt='xlsx') }}?{{ request.query_string|safe }}">Excel’e Aktar</a>
+            <a class="btn btn-success ms-auto" href="{{ export_url }}">Excel’e Aktar</a>
         </div>
     </form>
 

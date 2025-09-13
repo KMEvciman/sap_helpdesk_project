@@ -23,7 +23,7 @@ Additionally, the system provides SAP reports, a global search module, and graph
   - View and manage company devices (admin only)
 - **Logging & CLI Commands**
   - `flask create-admin` to create an admin user
-  - `flask init-db` to initialize the database
+  - `flask db-init` to initialize the database
 - **Dashboard**
   - Matplotlib-based graphs
   - Summary reports
@@ -73,7 +73,7 @@ FLASK_ENV=development
 
 ### 5. Initialize Database
 ```bash
-flask init-db
+flask db-init
 flask create-admin
 ```
 
@@ -96,7 +96,7 @@ flask run
 ## 👨‍💻 CLI Commands
 
 ```bash
-flask init-db        # Create database tables
+flask db-init        # Create database tables
 flask create-admin   # Create an admin user
 ```
 

@@ -23,7 +23,7 @@
         <label class="form-label mb-1">Öncelik</label>
         <select name="priority" class="form-select">
             <option value="">(hepsi)</option>
-            {% for p in ["açık","normal","yüksek"] %}
+            {% for p in ["düşük","normal","yüksek"] %}
             <option value="{{ p }}" {% if request.args.get('priority')==p %}selected{% endif %}>{{ p }}</option>
             {% endfor %}
         </select>

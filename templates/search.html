@@ -33,7 +33,7 @@
                                 <td><span class="badge bg-secondary">{{ t.priority }}</span></td>
                                 <td>
                                     <span
-                                        class="badge {% if t.status=='closed' %}bg-success{% elif t.status=='in_progress' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
+                                        class="badge {% if t.status == 'kapalı' %}bg-success{% elif t.status == 'işlem sürecinde' %}bg-warning text-dark{% else %}bg-info text-dark{% endif %}">
                                         {{ t.status }}
                                     </span>
                                 </td>
